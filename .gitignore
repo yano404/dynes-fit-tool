@@ -1,0 +1,12 @@
+# python
+__pycache__
+# pyenv
+.python-version
+# Environments
+.venv
+# visual-studio-code
+.vscode
+# mac
+.DS_Store
+# vim
+*~
