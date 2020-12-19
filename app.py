@@ -65,15 +65,14 @@ def update_table(contents, filename):
             return (
                 dbc.Alert(
                     [
-                        html.H5("Error"),
+                        html.H5("Error", className="alert-heading"),
                         html.P("There was an error processing this file."),
                     ],
-                    color="warning",
-                    dismissable=True,
-                    is_open=True,
+                    color="danger",
                 ),
                 None,
                 None,
+                "none",
             )
         if "voltage(uV)" in df.columns and "current(uA)" in df.columns:
             conductance = np.gradient(df["current(uA)"], df["voltage(uV)"])
