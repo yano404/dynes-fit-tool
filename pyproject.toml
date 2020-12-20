@@ -2,7 +2,7 @@
 name = "dynes-fit-tool"
 version = "0.1.0"
 description = "Tool to fit Dynes function"
-authors = ["Takayuki YANO <you@example.com>"]
+authors = ["Takayuki YANO <yanodelta@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
