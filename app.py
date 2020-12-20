@@ -60,6 +60,19 @@ def update_table(contents, filename):
                 df = pd.read_excel(io.BytesIO(decoded))
             elif ext == "txt":
                 df = pd.read_csv(io.StringIO(decoded.decode("utf-8")), delimiter=r"\s+")
+            else:
+                return (
+                    dbc.Alert(
+                        [
+                            html.H5("Error", className="alert-heading"),
+                            html.P("This file type is not supported."),
+                        ],
+                        color="danger",
+                    ),
+                    None,
+                    None,
+                    "none",
+                )
         except Exception as e:
             print(e)
             return (
@@ -74,8 +87,10 @@ def update_table(contents, filename):
                 None,
                 "none",
             )
-        if "voltage(uV)" in df.columns and "current(uA)" in df.columns:
-            conductance = np.gradient(df["current(uA)"], df["voltage(uV)"])
+        voltage = df.loc[:, df.columns.str.contains("voltage")]
+        current = df.loc[:, df.columns.str.contains("current")]
+        if voltage.size and current.size:
+            conductance = np.gradient(current.squeeze(), voltage.squeeze())
             df["conductance"] = conductance / conductance[-1]
         return (
             html.H6(filename, style={"word-break": "break-all"}),
@@ -360,7 +375,12 @@ data_table = html.Div(
     id="data-table-container",
     className="mx-1 mt-3",
     children=[
-        html.Div(id="data-table-name"),
+        # loading state
+        dcc.Loading(
+            id="loading-file",
+            type="circle",
+            children=html.Div(id="data-table-name"),
+        ),
         dash_table.DataTable(
             id="data-table",
             row_deletable=True,
