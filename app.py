@@ -332,8 +332,10 @@ header = dbc.Navbar(
             # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
-                    dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px")),
-                    dbc.Col(dbc.NavbarBrand("Dynes Fit", className="ml-2")),
+                    dbc.Col(html.Img(src=PLOTLY_LOGO, height="30px"), width="auto"),
+                    dbc.Col(
+                        dbc.NavbarBrand("Dynes Fit", className="ml-2"), width="auto"
+                    ),
                 ],
                 align="center",
                 no_gutters=True,
