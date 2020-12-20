@@ -341,7 +341,26 @@ header = dbc.Navbar(
                 no_gutters=True,
             ),
             href="#",
-        )
+        ),
+        dbc.NavbarToggler(id="navbar-toggler"),
+        # GitLab repository
+        dbc.Row(
+            [
+                dbc.Col(
+                    html.A(
+                        dbc.Button(
+                            "View on GitLab",
+                            outline=True,
+                        ),
+                        href="https://gitlab.com/yano404/dynes-fit-tool",
+                    ),
+                    width="auto",
+                ),
+            ],
+            no_gutters=True,
+            className="ml-auto flex-nowrap mt-3 mt-md-0",
+            align="center",
+        ),
     ],
     color="dark",
     dark=True,
