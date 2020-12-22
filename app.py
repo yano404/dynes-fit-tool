@@ -357,7 +357,7 @@ def update_graph(
             bounds = (lower_bounds, upper_bounds)
         else:
             # default bounds
-            lower_bounds = np.array([1000.0, 0.0, 0.1, -0.2])
+            lower_bounds = np.array([500.0, 0.0, 0.1, -0.2])
             upper_bounds = np.array([5000.0, 2000.0, 2.0, 0.2])
             bounds = (lower_bounds, upper_bounds)
         # p0
@@ -371,7 +371,7 @@ def update_graph(
             # default p0
             # default Delta_0 = x that corresponds to the peak y
             D0 = np.abs(df.loc[df[yaxis_id].idxmax(), xaxis_id])
-            G0 = 0.0
+            G0 = 100.0
             C0 = 1.0
             offset0 = 0.0
             # if p0 is out of bounds: p0 is set to the lower or upper bounds
