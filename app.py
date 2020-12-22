@@ -397,6 +397,16 @@ def update_graph(
                 html.Pre(
                     json.dumps(
                         {
+                            "lower_bounds": lower_bounds.tolist(),
+                            "upper_bounds": upper_bounds.tolist(),
+                            "p0": p0.tolist(),
+                        },
+                        indent=2,
+                    ),
+                ),
+                html.Pre(
+                    json.dumps(
+                        {
                             "popt": popt.tolist(),
                             "perr": perr.tolist(),
                             "pcov": pcov.tolist(),
