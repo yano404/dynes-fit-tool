@@ -34,6 +34,17 @@ FA = {
     "crossorigin": "anonymous",
 }
 
+
+def set_p0(p0, lower_bounds, upper_bounds):
+    rp0 = p0.copy()
+    for i, x in enumerate(p0):
+        if x < lower_bounds[i]:
+            rp0[i] = lower_bounds[i]
+        elif x > upper_bounds[i]:
+            rp0[i] = upper_bounds[i]
+    return rp0
+
+
 # setup app
 external_stylesheets = [dbc.themes.BOOTSTRAP, FA]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
@@ -345,8 +356,9 @@ def update_graph(
                 return (dash.no_update, dash.no_update, True, err_header, err_msg)
             bounds = (lower_bounds, upper_bounds)
         else:
-            lower_bounds = np.array([1000.0, 0.0, 0.1, -1.0])
-            upper_bounds = np.array([5000.0, 2000.0, 2.0, 1.0])
+            # default bounds
+            lower_bounds = np.array([1000.0, 0.0, 0.1, -0.2])
+            upper_bounds = np.array([5000.0, 2000.0, 2.0, 0.2])
             bounds = (lower_bounds, upper_bounds)
         # p0
         if use_p0:
@@ -356,7 +368,14 @@ def update_graph(
                 err_msg = "None in the p0. Remove None!"
                 return (dash.no_update, dash.no_update, True, err_header, err_msg)
         else:
-            p0 = np.array([1.5e3, 5e2, 1.0, 0.0])
+            # default p0
+            # default Delta_0 = x that corresponds to the peak y
+            D0 = np.abs(df.loc[df[yaxis_id].idxmax(), xaxis_id])
+            G0 = 0.0
+            C0 = 1.0
+            offset0 = 0.0
+            # if p0 is out of bounds: p0 is set to the lower or upper bounds
+            p0 = set_p0(np.array([D0, G0, C0, offset0]), lower_bounds, upper_bounds)
         # check if p0 in bounds
         if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
             err_header = "ValueError"
