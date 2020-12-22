@@ -103,7 +103,10 @@ def update_table(contents, filename):
             voltage = df.loc[:, voltage_col_name]
             current = df.loc[:, current_col_name]
             conductance = np.gradient(current.squeeze(), voltage.squeeze())
-            df["conductance"] = conductance / conductance[-1]
+            if any(df.columns.str.contains("conductance")):
+                df["conductance_1"] = conductance / conductance[-1]
+            else:
+                df["conductance"] = conductance / conductance[-1]
         return (
             html.H6(filename, style={"word-break": "break-all"}),
             df.to_dict("records"),
