@@ -27,8 +27,15 @@ def dynes(E, delta, gamma, C=0.0, offset=0.0):
     )
 
 
+FA = {
+    "href": "https://use.fontawesome.com/releases/v5.15.1/css/all.css",
+    "rel": "stylesheet",
+    "integrity": "sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp",
+    "crossorigin": "anonymous",
+}
+
 # setup app
-external_stylesheets = [dbc.themes.BOOTSTRAP]
+external_stylesheets = [dbc.themes.BOOTSTRAP, FA]
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 
@@ -196,6 +203,44 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
 
 
 @app.callback(
+    [
+        Output("card-body-bounds", "is_open"),
+        Output("card-body-bounds-open", "className"),
+    ],
+    Input("card-body-bounds-open", "n_clicks"),
+    State("card-body-bounds", "is_open"),
+)
+def update_bounds_cards(n_bounds, bouns_is_open):
+    angle_left = "fas fa-angle-left"
+    angle_down = "fas fa-angle-down"
+    if not n_bounds:
+        return (False, angle_left)
+    if bouns_is_open:
+        return (not bouns_is_open, angle_left)
+    else:
+        return (not bouns_is_open, angle_down)
+
+
+@app.callback(
+    [
+        Output("card-body-p0", "is_open"),
+        Output("card-body-p0-open", "className"),
+    ],
+    Input("card-body-p0-open", "n_clicks"),
+    State("card-body-p0", "is_open"),
+)
+def update_p0_cards(n_p0, p0_is_open):
+    angle_left = "fas fa-angle-left"
+    angle_down = "fas fa-angle-down"
+    if not n_p0:
+        return (False, angle_left)
+    if p0_is_open:
+        return (not p0_is_open, angle_left)
+    else:
+        return (not p0_is_open, angle_down)
+
+
+@app.callback(
     [Output("graph", "figure"), Output("fit-result", "children")],
     [
         Input("data-table", "data"),
@@ -216,6 +261,11 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
         State("G-upper", "value"),
         State("C-upper", "value"),
         State("offset-upper", "value"),
+        State("use-p0", "value"),
+        State("D-p0", "value"),
+        State("G-p0", "value"),
+        State("C-p0", "value"),
+        State("offset-p0", "value"),
     ],
 )
 def update_graph(
@@ -235,6 +285,11 @@ def update_graph(
     G_up,
     C_up,
     offset_up,
+    use_p0,
+    D_p0,
+    G_p0,
+    C_p0,
+    offset_p0,
 ):
     """
     rows : [
@@ -248,6 +303,7 @@ def update_graph(
     ]
     fit_range : [min, max]
     use_bounds : if True: [True]; else: [];
+    use_p0 : if True: [True]; else: [];
     """
     ctx = dash.callback_context
     if not rows or not xaxis_id or not yaxis_id:
@@ -269,6 +325,7 @@ def update_graph(
     )
     # if fit-button pushed: run scipy.optimize.curve_fit and plot function
     if ctx.triggered[0]["prop_id"] == "fit-button.n_clicks":
+        # bounds
         if use_bounds:
             lower_bounds = np.array([D_low, G_low, C_low, offset_low])
             upper_bounds = np.array([D_up, G_up, C_up, offset_up])
@@ -278,12 +335,29 @@ def update_graph(
                 raise PreventUpdate
             bounds = (lower_bounds, upper_bounds)
         else:
-            bounds = ((1000.0, 0.0, 0.1, -1.0), (5000.0, 2000.0, 2.0, 1.0))
+            lower_bounds = np.array([1000.0, 0.0, 0.1, -1.0])
+            upper_bounds = np.array([5000.0, 2000.0, 2.0, 1.0])
+            bounds = (lower_bounds, upper_bounds)
+        # p0
+        if use_p0:
+            p0 = np.array([D_p0, G_p0, C_p0, offset_p0])
+            if None in p0:
+                raise PreventUpdate
+        else:
+            p0 = np.array([1.5e3, 5e2, 1.0, 0.0])
+        # check if p0 in bounds
+        if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
+            print("p0 is invarid")
+            raise PreventUpdate
         # fit
         lower_lim, upper_lim = fit_range
         df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
         popt, pcov = scipy.optimize.curve_fit(
-            dynes, df_range[xaxis_id], df_range[yaxis_id], bounds=bounds
+            dynes,
+            df_range[xaxis_id],
+            df_range[yaxis_id],
+            bounds=bounds,
+            p0=p0,
         )
         perr = np.sqrt(np.diag(pcov))
         # plot function
@@ -548,105 +622,248 @@ fit_panel = dbc.Card(
                     ]
                 ),
                 html.Div(id="fit-range-indicator"),
-                dbc.Card(
+                html.Div(
                     [
-                        dbc.CardHeader(
+                        dbc.Card(
                             [
-                                dbc.Checklist(
-                                    id="use-bounds",
-                                    options=[{"label": "Bounds", "value": True}],
-                                    value=[],
-                                    switch=True,
-                                )
+                                dbc.CardHeader(
+                                    dbc.Row(
+                                        [
+                                            dbc.Col(
+                                                dbc.Checklist(
+                                                    id="use-bounds",
+                                                    options=[
+                                                        {
+                                                            "label": "Bounds",
+                                                            "value": True,
+                                                        }
+                                                    ],
+                                                    value=[],
+                                                    switch=True,
+                                                )
+                                            ),
+                                            dbc.Col(
+                                                dbc.Button(
+                                                    className="fas fa-angle-left",
+                                                    color="light",
+                                                    id="card-body-bounds-open",
+                                                ),
+                                                width={"size": 1, "order": 12},
+                                                className="mr-3",
+                                            ),
+                                        ],
+                                        align="center",
+                                    )
+                                ),
+                                dbc.Collapse(
+                                    dbc.CardBody(
+                                        [
+                                            html.H6("Delta", className="text-center"),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "lower bounds",
+                                                        html_for="D-lower",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="D-lower",
+                                                        placeholder="lower bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                    dbc.Label(
+                                                        "upper bounds",
+                                                        html_for="D-upper",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="D-upper",
+                                                        placeholder="upper bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            html.H6("Gamma", className="text-center"),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "lower bounds",
+                                                        html_for="G-lower",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="G-lower",
+                                                        placeholder="lower bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                    dbc.Label(
+                                                        "upper bounds",
+                                                        html_for="G-upper",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="G-upper",
+                                                        placeholder="upper bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            html.H6("Const", className="text-center"),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "lower bounds",
+                                                        html_for="C-lower",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="C-lower",
+                                                        placeholder="lower bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                    dbc.Label(
+                                                        "upper bounds",
+                                                        html_for="C-upper",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="C-upper",
+                                                        placeholder="upper bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            html.H6("Offset", className="text-center"),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "lower bounds",
+                                                        html_for="offset-lower",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="offset-lower",
+                                                        placeholder="lower bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                    dbc.Label(
+                                                        "upper bounds",
+                                                        html_for="offset-upper",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="offset-upper",
+                                                        placeholder="upper bounds",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                        ],
+                                        className="overflow-auto",
+                                        style={"height": "35vh"},
+                                    ),
+                                    id="card-body-bounds",
+                                ),
                             ]
                         ),
-                        dbc.CardBody(
+                        dbc.Card(
                             [
-                                html.H6("Delta", className="text-center"),
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("lower bounds", html_for="D-lower"),
-                                        dbc.Input(
-                                            id="D-lower",
-                                            placeholder="lower bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                        dbc.Label("upper bounds", html_for="D-upper"),
-                                        dbc.Input(
-                                            id="D-upper",
-                                            placeholder="upper bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                    ]
+                                dbc.CardHeader(
+                                    dbc.Row(
+                                        [
+                                            dbc.Col(
+                                                dbc.Checklist(
+                                                    id="use-p0",
+                                                    options=[
+                                                        {
+                                                            "label": "Init params",
+                                                            "value": True,
+                                                        }
+                                                    ],
+                                                    value=[],
+                                                    switch=True,
+                                                )
+                                            ),
+                                            dbc.Col(
+                                                dbc.Button(
+                                                    className="fas fa-angle-left",
+                                                    color="light",
+                                                    id="card-body-p0-open",
+                                                ),
+                                                width={"size": 1, "order": 12},
+                                                className="mr-3",
+                                            ),
+                                        ],
+                                        align="center",
+                                    )
                                 ),
-                                html.H6("Gamma", className="text-center"),
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("lower bounds", html_for="G-lower"),
-                                        dbc.Input(
-                                            id="G-lower",
-                                            placeholder="lower bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                        dbc.Label("upper bounds", html_for="G-upper"),
-                                        dbc.Input(
-                                            id="G-upper",
-                                            placeholder="upper bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                    ]
+                                dbc.Collapse(
+                                    dbc.CardBody(
+                                        [
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "Delta",
+                                                        html_for="D-p0",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="D-p0",
+                                                        placeholder="Delta p0",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "Gamma",
+                                                        html_for="G-p0",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="G-p0",
+                                                        placeholder="Gamma p0",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "Const",
+                                                        html_for="C-p0",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="C-p0",
+                                                        placeholder="Const p0",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                            dbc.FormGroup(
+                                                [
+                                                    dbc.Label(
+                                                        "Offset",
+                                                        html_for="offset-p0",
+                                                    ),
+                                                    dbc.Input(
+                                                        id="offset-p0",
+                                                        placeholder="Offset p0",
+                                                        type="number",
+                                                        bs_size="sm",
+                                                    ),
+                                                ]
+                                            ),
+                                        ]
+                                    ),
+                                    id="card-body-p0",
                                 ),
-                                html.H6("Const", className="text-center"),
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label("lower bounds", html_for="C-lower"),
-                                        dbc.Input(
-                                            id="C-lower",
-                                            placeholder="lower bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                        dbc.Label("upper bounds", html_for="C-upper"),
-                                        dbc.Input(
-                                            id="C-upper",
-                                            placeholder="upper bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                    ]
-                                ),
-                                html.H6("Offset", className="text-center"),
-                                dbc.FormGroup(
-                                    [
-                                        dbc.Label(
-                                            "lower bounds", html_for="offset-lower"
-                                        ),
-                                        dbc.Input(
-                                            id="offset-lower",
-                                            placeholder="lower bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                        dbc.Label(
-                                            "upper bounds", html_for="offset-upper"
-                                        ),
-                                        dbc.Input(
-                                            id="offset-upper",
-                                            placeholder="upper bounds",
-                                            type="number",
-                                            bs_size="sm",
-                                        ),
-                                    ]
-                                ),
-                            ],
-                            className="overflow-auto",
-                            style={"height": "35vh"},
+                            ]
                         ),
-                    ]
+                    ],
+                    className="accordion",
                 ),
                 dbc.Card(
                     [
