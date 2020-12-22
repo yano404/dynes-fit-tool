@@ -395,8 +395,12 @@ def update_graph(
         # plot function
         xmin = df.min()[xaxis_id]
         xmax = df.max()[xaxis_id]
-        x = np.linspace(xmin, xmax, 200)
-        fig.add_trace(go.Scatter(x=x, y=dynes(x, *popt), mode="lines", name="fit"))
+        x = np.linspace(xmin, xmax, 500)
+        fig.add_trace(
+            go.Scatter(
+                x=x, y=dynes(x, *popt), mode="lines", name="fit", hoverinfo="none"
+            )
+        )
         # plot fit range
         if plot_fit_range:
             fig.add_vrect(
