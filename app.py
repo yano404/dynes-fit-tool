@@ -241,7 +241,13 @@ def update_p0_cards(n_p0, p0_is_open):
 
 
 @app.callback(
-    [Output("graph", "figure"), Output("fit-result", "children")],
+    [
+        Output("graph", "figure"),
+        Output("fit-result", "children"),
+        Output("msg-toast", "is_open"),
+        Output("msg-toast", "header"),
+        Output("msg-toast", "children"),
+    ],
     [
         Input("data-table", "data"),
         Input("data-table", "columns"),
@@ -330,9 +336,13 @@ def update_graph(
             lower_bounds = np.array([D_low, G_low, C_low, offset_low])
             upper_bounds = np.array([D_up, G_up, C_up, offset_up])
             if None in lower_bounds or None in upper_bounds:
-                raise PreventUpdate
+                err_header = "ValueError"
+                err_msg = "None in the bounds. Remove None!"
+                return (dash.no_update, dash.no_update, True, err_header, err_msg)
             if np.any(lower_bounds >= upper_bounds):
-                raise PreventUpdate
+                err_header = "ValueError"
+                err_msg = "lower_bounds >= upper_bounds."
+                return (dash.no_update, dash.no_update, True, err_header, err_msg)
             bounds = (lower_bounds, upper_bounds)
         else:
             lower_bounds = np.array([1000.0, 0.0, 0.1, -1.0])
@@ -342,13 +352,16 @@ def update_graph(
         if use_p0:
             p0 = np.array([D_p0, G_p0, C_p0, offset_p0])
             if None in p0:
-                raise PreventUpdate
+                err_header = "ValueError"
+                err_msg = "None in the p0. Remove None!"
+                return (dash.no_update, dash.no_update, True, err_header, err_msg)
         else:
             p0 = np.array([1.5e3, 5e2, 1.0, 0.0])
         # check if p0 in bounds
         if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
-            print("p0 is invarid")
-            raise PreventUpdate
+            err_header = "ValueError"
+            err_msg = "p0 are out of bounds!"
+            return (dash.no_update, dash.no_update, True, err_header, err_msg)
         # fit
         lower_lim, upper_lim = fit_range
         df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
@@ -419,7 +432,7 @@ def update_graph(
     else:
         result = None
 
-    return (fig, result)
+    return (fig, result, False, None, None)
 
 
 # UI components
@@ -901,6 +914,13 @@ app.layout = html.Div(
         html.Div(
             id="content",
             children=[dbc.Row([dbc.Col(graph, width=8), dbc.Col(fit_panel, width=4)])],
+        ),
+        dbc.Toast(
+            id="msg-toast",
+            is_open=False,
+            dismissable=True,
+            icon="danger",
+            style={"position": "fixed", "top": 66, "right": 10, "width": 350},
         ),
     ]
 )
