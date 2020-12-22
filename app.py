@@ -57,10 +57,13 @@ def update_table(contents, filename):
                 # Assume that the user uploaded a CSV file
                 df = pd.read_csv(io.StringIO(decoded.decode("utf-8")))
             elif ext == "xls" or ext == "xlsx":
+                # Assume that the user uploaded a Excel file
                 df = pd.read_excel(io.BytesIO(decoded))
             elif ext == "txt":
+                # Assume that the user uploaded a Whitspace separated values file
                 df = pd.read_csv(io.StringIO(decoded.decode("utf-8")), delimiter=r"\s+")
             else:
+                # User uploaded a not-supported file
                 return (
                     dbc.Alert(
                         [
@@ -87,9 +90,18 @@ def update_table(contents, filename):
                 None,
                 "none",
             )
-        voltage = df.loc[:, df.columns.str.contains("voltage")]
-        current = df.loc[:, df.columns.str.contains("current")]
-        if voltage.size and current.size:
+        mask_voltage = df.columns.str.contains("voltage")
+        mask_current = df.columns.str.contains("current")
+        if any(mask_voltage) and any(mask_current):
+            voltage_col_name = df.columns[mask_voltage][0]
+            current_col_name = df.columns[mask_current][0]
+            df = (
+                df.sort_values(current_col_name)
+                .reset_index(drop=True)
+                .drop_duplicates(subset=current_col_name)
+            )
+            voltage = df.loc[:, voltage_col_name]
+            current = df.loc[:, current_col_name]
             conductance = np.gradient(current.squeeze(), voltage.squeeze())
             df["conductance"] = conductance / conductance[-1]
         return (
