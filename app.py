@@ -152,11 +152,13 @@ def update_graph_axis_select(columns):
 
 
 @app.callback(
-    Output("fit-range-indicator", "children"), [Input("fit-range-slider", "value")]
+    Output("fit-range-slider-label", "children"), [Input("fit-range-slider", "value")]
 )
 def display_fit_range(value):
     if value is not None:
-        return html.P(f"{value[0]} : {value[1]}")
+        return f"Fit Range : [{value[0]} : {value[1]}]"
+    else:
+        return "Fit Range"
 
 
 @app.callback(
@@ -614,7 +616,11 @@ fit_panel = dbc.Card(
                 ),
                 dbc.FormGroup(
                     [
-                        dbc.Label("Fit Range", html_for="fit-range-slider"),
+                        dbc.Label(
+                            "Fit Range",
+                            id="fit-range-slider-label",
+                            html_for="fit-range-slider",
+                        ),
                         dcc.RangeSlider(id="fit-range-slider"),
                         dbc.Row(
                             [
@@ -667,7 +673,6 @@ fit_panel = dbc.Card(
                         ),
                     ]
                 ),
-                html.Div(id="fit-range-indicator"),
                 html.Div(
                     [
                         dbc.Card(
