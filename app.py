@@ -217,6 +217,21 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
 
 @app.callback(
     [
+        Output("offset-lower", "disabled"),
+        Output("offset-upper", "disabled"),
+        Output("offset-p0", "disabled"),
+    ],
+    Input("fix-offset", "value"),
+)
+def switch_offset(fix_offset):
+    if fix_offset:
+        return (True, True, True)
+    else:
+        return (False, False, False)
+
+
+@app.callback(
+    [
         Output("card-body-bounds", "is_open"),
         Output("card-body-bounds-open", "className"),
     ],
@@ -271,6 +286,7 @@ def update_p0_cards(n_p0, p0_is_open):
     [
         State("fit-range-slider", "value"),
         State("plot-fit-range", "value"),
+        State("fix-offset", "value"),
         State("use-bounds", "value"),
         State("D-lower", "value"),
         State("G-lower", "value"),
@@ -295,6 +311,7 @@ def update_graph(
     n_clicks,
     fit_range,
     plot_fit_range,
+    fix_offset,
     use_bounds,
     D_low,
     G_low,
@@ -344,56 +361,116 @@ def update_graph(
     )
     # if fit-button pushed: run scipy.optimize.curve_fit and plot function
     if ctx.triggered[0]["prop_id"] == "fit-button.n_clicks":
-        # bounds
-        if use_bounds:
-            lower_bounds = np.array([D_low, G_low, C_low, offset_low])
-            upper_bounds = np.array([D_up, G_up, C_up, offset_up])
-            if None in lower_bounds or None in upper_bounds:
-                err_header = "ValueError"
-                err_msg = "None in the bounds. Remove None!"
-                return (dash.no_update, dash.no_update, True, err_header, err_msg)
-            if np.any(lower_bounds >= upper_bounds):
-                err_header = "ValueError"
-                err_msg = "lower_bounds >= upper_bounds."
-                return (dash.no_update, dash.no_update, True, err_header, err_msg)
-            bounds = (lower_bounds, upper_bounds)
+        if fix_offset:
+            fixed_offset = 0.0
+            param_names = ["Delta", "Gamma", "Const"]
+            # bounds
+            if use_bounds:
+                lower_bounds = np.array([D_low, G_low, C_low])
+                upper_bounds = np.array(
+                    [
+                        D_up,
+                        G_up,
+                        C_up,
+                    ]
+                )
+                if None in lower_bounds or None in upper_bounds:
+                    err_header = "ValueError"
+                    err_msg = "None in the bounds. Remove None!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                if np.any(lower_bounds >= upper_bounds):
+                    err_header = "ValueError"
+                    err_msg = "lower_bounds >= upper_bounds."
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                bounds = (lower_bounds, upper_bounds)
+            else:
+                # default bounds
+                lower_bounds = np.array([500.0, 0.0, 0.1])
+                upper_bounds = np.array([5000.0, 2000.0, 2.0])
+                bounds = (lower_bounds, upper_bounds)
+            # p0
+            if use_p0:
+                p0 = np.array([D_p0, G_p0, C_p0])
+                if None in p0:
+                    err_header = "ValueError"
+                    err_msg = "None in the p0. Remove None!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                # check if p0 in bounds
+                if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
+                    err_header = "ValueError"
+                    err_msg = "p0 are out of bounds!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+            else:
+                # default p0
+                # default Delta_0 = x that corresponds to the peak y
+                D0 = np.abs(df.loc[df[yaxis_id].idxmax(), xaxis_id])
+                G0 = 100.0
+                C0 = 1.0
+                # if p0 is out of bounds: p0 is set to the lower or upper bounds
+                p0 = set_p0(np.array([D0, G0, C0]), lower_bounds, upper_bounds)
+            # fit
+            lower_lim, upper_lim = fit_range
+            df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
+            popt, pcov = scipy.optimize.curve_fit(
+                lambda E, delta, gamma, C=0.0: dynes(E, delta, gamma, C, fixed_offset),
+                df_range[xaxis_id],
+                df_range[yaxis_id],
+                bounds=bounds,
+                p0=p0,
+            )
+            perr = np.sqrt(np.diag(pcov))
         else:
-            # default bounds
-            lower_bounds = np.array([500.0, 0.0, 0.1, -0.2])
-            upper_bounds = np.array([5000.0, 2000.0, 2.0, 0.2])
-            bounds = (lower_bounds, upper_bounds)
-        # p0
-        if use_p0:
-            p0 = np.array([D_p0, G_p0, C_p0, offset_p0])
-            if None in p0:
-                err_header = "ValueError"
-                err_msg = "None in the p0. Remove None!"
-                return (dash.no_update, dash.no_update, True, err_header, err_msg)
-        else:
-            # default p0
-            # default Delta_0 = x that corresponds to the peak y
-            D0 = np.abs(df.loc[df[yaxis_id].idxmax(), xaxis_id])
-            G0 = 100.0
-            C0 = 1.0
-            offset0 = 0.0
-            # if p0 is out of bounds: p0 is set to the lower or upper bounds
-            p0 = set_p0(np.array([D0, G0, C0, offset0]), lower_bounds, upper_bounds)
-        # check if p0 in bounds
-        if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
-            err_header = "ValueError"
-            err_msg = "p0 are out of bounds!"
-            return (dash.no_update, dash.no_update, True, err_header, err_msg)
-        # fit
-        lower_lim, upper_lim = fit_range
-        df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
-        popt, pcov = scipy.optimize.curve_fit(
-            dynes,
-            df_range[xaxis_id],
-            df_range[yaxis_id],
-            bounds=bounds,
-            p0=p0,
-        )
-        perr = np.sqrt(np.diag(pcov))
+            param_names = ["Delta", "Gamma", "Const", "Offset"]
+            # bounds
+            if use_bounds:
+                lower_bounds = np.array([D_low, G_low, C_low, offset_low])
+                upper_bounds = np.array([D_up, G_up, C_up, offset_up])
+                if None in lower_bounds or None in upper_bounds:
+                    err_header = "ValueError"
+                    err_msg = "None in the bounds. Remove None!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                if np.any(lower_bounds >= upper_bounds):
+                    err_header = "ValueError"
+                    err_msg = "lower_bounds >= upper_bounds."
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                bounds = (lower_bounds, upper_bounds)
+            else:
+                # default bounds
+                lower_bounds = np.array([500.0, 0.0, 0.1, -0.2])
+                upper_bounds = np.array([5000.0, 2000.0, 2.0, 0.2])
+                bounds = (lower_bounds, upper_bounds)
+            # p0
+            if use_p0:
+                p0 = np.array([D_p0, G_p0, C_p0, offset_p0])
+                if None in p0:
+                    err_header = "ValueError"
+                    err_msg = "None in the p0. Remove None!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                # check if p0 in bounds
+                if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
+                    err_header = "ValueError"
+                    err_msg = "p0 are out of bounds!"
+                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+            else:
+                # default p0
+                # default Delta_0 = x that corresponds to the peak y
+                D0 = np.abs(df.loc[df[yaxis_id].idxmax(), xaxis_id])
+                G0 = 100.0
+                C0 = 1.0
+                offset0 = 0.0
+                # if p0 is out of bounds: p0 is set to the lower or upper bounds
+                p0 = set_p0(np.array([D0, G0, C0, offset0]), lower_bounds, upper_bounds)
+            # fit
+            lower_lim, upper_lim = fit_range
+            df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
+            popt, pcov = scipy.optimize.curve_fit(
+                dynes,
+                df_range[xaxis_id],
+                df_range[yaxis_id],
+                bounds=bounds,
+                p0=p0,
+            )
+            perr = np.sqrt(np.diag(pcov))
         # plot function
         xmin = df.min()[xaxis_id]
         xmax = df.max()[xaxis_id]
@@ -422,9 +499,7 @@ def update_graph(
             html.Tbody(
                 [
                     html.Tr([html.Td(p), html.Td(v), html.Td(e)])
-                    for p, v, e in zip(
-                        ["Delta", "Gamma", "Const", "Offset"], popt, perr
-                    )
+                    for p, v, e in zip(param_names, popt, perr)
                 ]
             )
         ]
@@ -673,6 +748,24 @@ fit_panel = dbc.Card(
                         ),
                     ]
                 ),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            dbc.Checklist(
+                                id="fix-offset",
+                                options=[
+                                    {
+                                        "label": "Fix offset to 0",
+                                        "value": True,
+                                    }
+                                ],
+                                value=[],
+                                switch=True,
+                            ),
+                            width="auto",
+                        )
+                    ]
+                ),
                 html.Div(
                     [
                         dbc.Card(
@@ -914,7 +1007,7 @@ fit_panel = dbc.Card(
                             ]
                         ),
                     ],
-                    className="accordion",
+                    className="accordion mt-3",
                 ),
                 dbc.Card(
                     [
