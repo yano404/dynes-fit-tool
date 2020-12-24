@@ -367,13 +367,7 @@ def update_graph(
             # bounds
             if use_bounds:
                 lower_bounds = np.array([D_low, G_low, C_low])
-                upper_bounds = np.array(
-                    [
-                        D_up,
-                        G_up,
-                        C_up,
-                    ]
-                )
+                upper_bounds = np.array([D_up, G_up, C_up])
                 if None in lower_bounds or None in upper_bounds:
                     err_header = "ValueError"
                     err_msg = "None in the bounds. Remove None!"
