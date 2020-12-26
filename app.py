@@ -195,6 +195,7 @@ def update_fit_range_min_max(rows, columns, xaxis_id, yaxis_id):
         Output("fit-range-slider", "min"),
         Output("fit-range-slider", "max"),
         Output("fit-range-slider", "value"),
+        Output("fit-range-slider", "step"),
         Output("fit-range-toast", "is_open"),
         Output("fit-range-toast", "header"),
         Output("fit-range-toast", "children"),
@@ -214,20 +215,31 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
             dash.no_update,
             dash.no_update,
             dash.no_update,
+            dash.no_update,
             True,
             "ValueError",
             "xmin must be less than xmax!",
         )
     if fit_range:
         fit_range_lower, fit_range_upper = fit_range
-        if fit_range_lower <= xmin:
+        # xmin|-----|xmax
+        if fit_range_lower <= xmin or fit_range_lower > xmax:
+            # lower     xmin       xmax    lower&xmin     xmax
+            #   x--------|----------|   ->      *----------|
+            #  xmin       xmax    lower    lower&xmin     xmax
+            #   |----------|--------x   ->      *----------|
             fit_range_lower = xmin
-        if fit_range_upper >= xmax:
+        if fit_range_upper >= xmax or fit_range_upper < xmin:
+            #  xmin       xmax    upper    xmin   upper&xmax
+            #   |----------|--------x   ->  |----------*
+            # upper     xmin       xmax    xmin   upper&xmax
+            #   x--------|----------|   ->  |----------*
             fit_range_upper = xmax
         value = [fit_range_lower, fit_range_upper]
     else:
         value = [xmin, xmax]
-    return (xmin, xmax, value, False, None, None)
+    step = np.power(10, np.floor(np.log10(xmax - xmin))) / 100
+    return (xmin, xmax, value, step, False, None, None)
 
 
 @app.callback(
