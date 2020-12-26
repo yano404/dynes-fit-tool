@@ -27,10 +27,8 @@ def dynes(E, delta, gamma, C=0.0, offset=0.0):
     )
 
 
-FA = {
-    "href": "https://use.fontawesome.com/releases/v5.15.1/css/all.css",
-    "rel": "stylesheet",
-    "integrity": "sha384-vp86vTRFVJgpjF9jiIGPEEqYqlDwgyBgEF109VFjmqGmIY/Y4HV4d3Gp2irVfcrp",
+FONTAWESOME = {
+    "src": "https://kit.fontawesome.com/0459d3686b.js",
     "crossorigin": "anonymous",
 }
 
@@ -46,8 +44,13 @@ def set_p0(p0, lower_bounds, upper_bounds):
 
 
 # setup app
-external_stylesheets = [dbc.themes.BOOTSTRAP, FA]
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+external_stylesheets = [dbc.themes.BOOTSTRAP]
+external_scripts = [FONTAWESOME]
+app = dash.Dash(
+    __name__,
+    external_stylesheets=external_stylesheets,
+    external_scripts=external_scripts,
+)
 
 
 # function to get file extention
