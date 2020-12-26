@@ -32,17 +32,6 @@ FONTAWESOME = {
     "crossorigin": "anonymous",
 }
 
-
-def set_p0(p0, lower_bounds, upper_bounds):
-    rp0 = p0.copy()
-    for i, x in enumerate(p0):
-        if x < lower_bounds[i]:
-            rp0[i] = lower_bounds[i]
-        elif x > upper_bounds[i]:
-            rp0[i] = upper_bounds[i]
-    return rp0
-
-
 # setup app
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 external_scripts = [FONTAWESOME]
@@ -53,7 +42,20 @@ app = dash.Dash(
 )
 
 
-# function to get file extention
+# validate and set initial params
+def set_p0(p0, lower_bounds, upper_bounds):
+    rp0 = p0.copy()
+    for i, x in enumerate(p0):
+        # if initial params violate the bounds,
+        # choose the limit of bounds as initial params.
+        if x < lower_bounds[i]:
+            rp0[i] = lower_bounds[i]
+        elif x > upper_bounds[i]:
+            rp0[i] = upper_bounds[i]
+    return rp0
+
+
+# get file extention
 def get_ext(filename):
     return filename.split(".")[-1]
 
@@ -68,7 +70,7 @@ def get_ext(filename):
     [Input("upload-data", "contents")],
     [State("upload-data", "filename")],
 )
-def update_table(contents, filename):
+def update_data_table(contents, filename):
     if contents is not None:
         content_type, content_string = contents.split(",")
         decoded = base64.b64decode(content_string)
@@ -157,7 +159,7 @@ def update_graph_axis_select(columns):
 @app.callback(
     Output("fit-range-slider-label", "children"), [Input("fit-range-slider", "value")]
 )
-def display_fit_range(value):
+def indicate_fit_range(value):
     if value is not None:
         return f"Fit Range : [{value[0]} : {value[1]}]"
     else:
@@ -226,7 +228,7 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
     ],
     Input("fix-offset", "value"),
 )
-def switch_offset(fix_offset):
+def switch_fix_offset(fix_offset):
     if fix_offset:
         return (True, True, True)
     else:
@@ -241,7 +243,7 @@ def switch_offset(fix_offset):
     Input("card-body-bounds-open", "n_clicks"),
     State("card-body-bounds", "is_open"),
 )
-def update_bounds_cards(n_bounds, bouns_is_open):
+def toggle_bounds_cards(n_bounds, bouns_is_open):
     angle_left = "fas fa-angle-left"
     angle_down = "fas fa-angle-down"
     if not n_bounds:
@@ -260,7 +262,7 @@ def update_bounds_cards(n_bounds, bouns_is_open):
     Input("card-body-p0-open", "n_clicks"),
     State("card-body-p0", "is_open"),
 )
-def update_p0_cards(n_p0, p0_is_open):
+def toggle_p0_cards(n_p0, p0_is_open):
     angle_left = "fas fa-angle-left"
     angle_down = "fas fa-angle-down"
     if not n_p0:
@@ -533,7 +535,7 @@ def update_graph(
 
 
 # UI components
-# header
+# Header
 PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
 header = dbc.Navbar(
     [
@@ -577,7 +579,7 @@ header = dbc.Navbar(
     sticky="top",
 )
 
-# file uploader
+# File uploader
 file_upload = html.Div(
     [
         html.H4(
@@ -600,7 +602,7 @@ file_upload = html.Div(
     ]
 )
 
-# data table
+# Data table
 data_table = html.Div(
     id="data-table-container",
     className="mx-1 mt-3",
@@ -622,7 +624,8 @@ data_table = html.Div(
     ],
 )
 
-# sidebar
+# Sidebar
+# This contains file-uploader and data table
 sidebar = html.Div(
     id="sidebar",
     children=[
@@ -633,7 +636,7 @@ sidebar = html.Div(
     ],
 )
 
-# graph
+# Graph
 graph = dbc.Card(
     id="graph-card",
     children=[
@@ -672,7 +675,7 @@ graph = dbc.Card(
     ],
 )
 
-# fit panel
+# Fit panel
 fit_panel = dbc.Card(
     id="fit-panel",
     children=[
@@ -1024,7 +1027,17 @@ fit_panel = dbc.Card(
     ],
 )
 
-# layout
+# Toast
+# Display error message etc.
+msg_toast = dbc.Toast(
+    id="msg-toast",
+    is_open=False,
+    dismissable=True,
+    icon="danger",
+    style={"position": "fixed", "top": 66, "right": 10, "width": 350},
+)
+
+# Layout
 app.layout = html.Div(
     [
         html.Div([sidebar]),
@@ -1033,13 +1046,7 @@ app.layout = html.Div(
             id="content",
             children=[dbc.Row([dbc.Col(graph, width=8), dbc.Col(fit_panel, width=4)])],
         ),
-        dbc.Toast(
-            id="msg-toast",
-            is_open=False,
-            dismissable=True,
-            icon="danger",
-            style={"position": "fixed", "top": 66, "right": 10, "width": 350},
-        ),
+        msg_toast,
     ]
 )
 
