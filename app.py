@@ -195,6 +195,9 @@ def update_fit_range_min_max(rows, columns, xaxis_id, yaxis_id):
         Output("fit-range-slider", "min"),
         Output("fit-range-slider", "max"),
         Output("fit-range-slider", "value"),
+        Output("fit-range-toast", "is_open"),
+        Output("fit-range-toast", "header"),
+        Output("fit-range-toast", "children"),
     ],
     [Input("apply-fit-range-min-max", "n_clicks")],
     [
@@ -207,7 +210,14 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
     if xmin is None or xmax is None:
         raise PreventUpdate
     if xmin >= xmax:
-        raise PreventUpdate
+        return (
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
+            True,
+            "ValueError",
+            "xmin must be less than xmax!",
+        )
     if fit_range:
         fit_range_lower, fit_range_upper = fit_range
         if fit_range_lower <= xmin:
@@ -217,7 +227,7 @@ def update_fit_range(apply_clicked, xmin, xmax, fit_range):
         value = [fit_range_lower, fit_range_upper]
     else:
         value = [xmin, xmax]
-    return (xmin, xmax, value)
+    return (xmin, xmax, value, False, None, None)
 
 
 @app.callback(
@@ -277,9 +287,9 @@ def toggle_p0_cards(n_p0, p0_is_open):
     [
         Output("graph", "figure"),
         Output("fit-result", "children"),
-        Output("msg-toast", "is_open"),
-        Output("msg-toast", "header"),
-        Output("msg-toast", "children"),
+        Output("graph-fit-toast", "is_open"),
+        Output("graph-fit-toast", "header"),
+        Output("graph-fit-toast", "children"),
     ],
     [
         Input("data-table", "data"),
@@ -1027,15 +1037,23 @@ fit_panel = dbc.Card(
     ],
 )
 
-# Toast
+
+def make_toast(
+    id, icon="danger", style={"position": "fixed", "top": 66, "right": 10, "width": 350}
+):
+    return dbc.Toast(
+        id=id,
+        is_open=False,
+        dismissable=True,
+        icon=icon,
+        style=style,
+    )
+
+
+# Toasts
 # Display error message etc.
-msg_toast = dbc.Toast(
-    id="msg-toast",
-    is_open=False,
-    dismissable=True,
-    icon="danger",
-    style={"position": "fixed", "top": 66, "right": 10, "width": 350},
-)
+graph_fit_toast = make_toast("graph-fit-toast")
+fit_range_toast = make_toast("fit-range-toast")
 
 # Layout
 app.layout = html.Div(
@@ -1046,7 +1064,8 @@ app.layout = html.Div(
             id="content",
             children=[dbc.Row([dbc.Col(graph, width=8), dbc.Col(fit_panel, width=4)])],
         ),
-        msg_toast,
+        graph_fit_toast,
+        fit_range_toast,
     ]
 )
 
