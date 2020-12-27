@@ -16,10 +16,10 @@ from dash.exceptions import PreventUpdate
 
 
 # dynes function
-def dynes(E, delta, gamma, C=0.0, offset=0.0):
+def dynes(E, delta, gamma, coeff=0.0, offset=0.0):
     igam = gamma * 1.0j
     return (
-        C
+        coeff
         * np.abs(
             np.real((E - igam) / np.power(np.square(E - igam) - np.square(delta), 0.5))
         )
@@ -390,7 +390,7 @@ def update_graph(
     if ctx.triggered[0]["prop_id"] == "fit-button.n_clicks":
         if fix_offset:
             fixed_offset = 0.0
-            param_names = ["Delta", "Gamma", "Const"]
+            param_names = ["Delta", "Gamma", "Coeff"]
             # bounds
             if use_bounds:
                 lower_bounds = np.array([D_low, G_low, C_low])
@@ -441,7 +441,7 @@ def update_graph(
             )
             perr = np.sqrt(np.diag(pcov))
         else:
-            param_names = ["Delta", "Gamma", "Const", "Offset"]
+            param_names = ["Delta", "Gamma", "Coeff", "Offset"]
             # bounds
             if use_bounds:
                 lower_bounds = np.array([D_low, G_low, C_low, offset_low])
@@ -874,7 +874,7 @@ fit_panel = dbc.Card(
                                                     ),
                                                 ]
                                             ),
-                                            html.H6("Const", className="text-center"),
+                                            html.H6("Coeff", className="text-center"),
                                             dbc.FormGroup(
                                                 [
                                                     dbc.Label(
@@ -997,12 +997,12 @@ fit_panel = dbc.Card(
                                             dbc.FormGroup(
                                                 [
                                                     dbc.Label(
-                                                        "Const",
+                                                        "Coeff",
                                                         html_for="C-p0",
                                                     ),
                                                     dbc.Input(
                                                         id="C-p0",
-                                                        placeholder="Const p0",
+                                                        placeholder="Coeff p0",
                                                         type="number",
                                                         bs_size="sm",
                                                     ),
