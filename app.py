@@ -406,8 +406,8 @@ def update_graph(
                 bounds = (lower_bounds, upper_bounds)
             else:
                 # default bounds
-                lower_bounds = np.array([500.0, 0.0, 0.1])
-                upper_bounds = np.array([5000.0, 2000.0, 2.0])
+                lower_bounds = np.array([0.0, 0.0, 0.0])
+                upper_bounds = np.array([np.inf, np.inf, np.inf])
                 bounds = (lower_bounds, upper_bounds)
             # p0
             if use_p0:
@@ -457,8 +457,8 @@ def update_graph(
                 bounds = (lower_bounds, upper_bounds)
             else:
                 # default bounds
-                lower_bounds = np.array([500.0, 0.0, 0.1, -0.2])
-                upper_bounds = np.array([5000.0, 2000.0, 2.0, 0.2])
+                lower_bounds = np.array([0.0, 0.0, 0.0, -np.inf])
+                upper_bounds = np.array([np.inf, np.inf, np.inf, np.inf])
                 bounds = (lower_bounds, upper_bounds)
             # p0
             if use_p0:
