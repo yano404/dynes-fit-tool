@@ -60,6 +60,13 @@ def get_ext(filename):
     return filename.split(".")[-1]
 
 
+def display_style(switch):
+    if switch:
+        return {}
+    else:
+        return {"display": "none"}
+
+
 @app.callback(
     [
         Output("data-table-name", "children"),
@@ -556,6 +563,30 @@ def update_graph(
     return (fig, result, False, None, None)
 
 
+@app.callback(
+    Output("settings-modal", "is_open"),
+    [
+        Input("settings-open-button", "n_clicks"),
+        Input("settings-close-button", "n_clicks"),
+    ],
+    [State("settings-modal", "is_open")],
+    prevent_initial_call=True,
+)
+def toggle_settings(n_open, n_close, is_open):
+    return not is_open
+
+
+@app.callback(
+    Output("settings-calc-conductance", "style"),
+    [Input("settings-switch-calc-conductance", "value")],
+)
+def toggle_settings_calc_cond(switch):
+    if switch:
+        return display_style(True)
+    else:
+        return display_style(False)
+
+
 # UI components
 # Header
 PLOTLY_LOGO = "https://images.plot.ly/logo/new-branding/plotly-logomark.png"
@@ -588,6 +619,13 @@ header = dbc.Navbar(
                         href="https://gitlab.com/yano404/dynes-fit-tool",
                     ),
                     width="auto",
+                ),
+                dbc.Col(
+                    dbc.Button(
+                        id="settings-open-button", className="fas fa-cog", color="dark"
+                    ),
+                    width="auto",
+                    className="ml-2",
                 ),
             ],
             no_gutters=True,
@@ -1049,6 +1087,139 @@ fit_panel = dbc.Card(
     ],
 )
 
+# Settings
+settings_modal = dbc.Modal(
+    [
+        dbc.ModalHeader(html.H4("Settings")),
+        dbc.ModalBody(
+            [
+                dbc.Card(
+                    dbc.CardBody(
+                        [
+                            html.H5("Conductance", className="card-title"),
+                            dbc.Checklist(
+                                id="settings-switch-calc-conductance",
+                                options=[
+                                    {
+                                        "label": "Calculate conductance",
+                                        "value": True,
+                                    }
+                                ],
+                                value=[True],
+                                switch=True,
+                                persistence=True,
+                                persistence_type="session",
+                            ),
+                            html.Div(
+                                [
+                                    html.H6("Voltage column name", className="mt-2"),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.Input(
+                                                id="settings-voltage-col",
+                                                type="text",
+                                                value="voltage",
+                                                placeholder="Type voltage column name",
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                            dbc.RadioItems(
+                                                id="settings-voltage-col-mode",
+                                                options=[
+                                                    {
+                                                        "label": "contains",
+                                                        "value": "contains",
+                                                    },
+                                                    {
+                                                        "label": "match",
+                                                        "value": "match",
+                                                    },
+                                                ],
+                                                value="contains",
+                                                inline=True,
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                        ]
+                                    ),
+                                    html.H6("Current column name", className="mt-2"),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.Input(
+                                                id="settings-current-col",
+                                                type="text",
+                                                value="current",
+                                                placeholder="Type current column name",
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                            dbc.RadioItems(
+                                                id="settings-current-col-mode",
+                                                options=[
+                                                    {
+                                                        "label": "contains",
+                                                        "value": "contains",
+                                                    },
+                                                    {
+                                                        "label": "match",
+                                                        "value": "match",
+                                                    },
+                                                ],
+                                                value="contains",
+                                                inline=True,
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                        ]
+                                    ),
+                                    html.H6("Normalization factor", className="mt-2"),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.RadioItems(
+                                                id="settings-norm-mode",
+                                                options=[
+                                                    {
+                                                        "label": "First element",
+                                                        "value": 0,
+                                                    },
+                                                    {
+                                                        "label": "Last element",
+                                                        "value": 1,
+                                                    },
+                                                    {"label": "Custom", "value": 2},
+                                                ],
+                                                value=0,
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                            dbc.Input(
+                                                id="settings-custom-norm-factor",
+                                                className="mt-1 ml-4",
+                                                type="number",
+                                                placeholder="Custom normalization factor",
+                                                persistence=True,
+                                                persistence_type="session",
+                                                style={"width": "95%"},
+                                            ),
+                                            dbc.FormText("Default: first element"),
+                                        ]
+                                    ),
+                                ],
+                                id="settings-calc-conductance",
+                            ),
+                        ]
+                    )
+                )
+            ]
+        ),
+        dbc.ModalFooter(
+            dbc.Button("Close", id="settings-close-button", className="ml-auto")
+        ),
+    ],
+    id="settings-modal",
+    scrollable=True,
+)
+
 
 def make_toast(
     id, icon="danger", style={"position": "fixed", "top": 66, "right": 10, "width": 350}
@@ -1076,6 +1247,7 @@ app.layout = html.Div(
             id="content",
             children=[dbc.Row([dbc.Col(graph, width=8), dbc.Col(fit_panel, width=4)])],
         ),
+        settings_modal,
         graph_fit_toast,
         fit_range_toast,
     ]
