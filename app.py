@@ -735,6 +735,7 @@ data_table = html.Div(
 # This contains file-uploader and data table
 sidebar = html.Div(
     id="sidebar",
+    className="overflow-auto",
     children=[
         file_upload,
         html.Hr(),
