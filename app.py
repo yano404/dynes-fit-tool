@@ -487,14 +487,25 @@ def update_graph(
             # fit
             lower_lim, upper_lim = fit_range
             df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
-            popt, pcov = scipy.optimize.curve_fit(
-                lambda E, delta, gamma, C=0.0: dynes(E, delta, gamma, C, fixed_offset),
-                df_range[xaxis_id],
-                df_range[yaxis_id],
-                bounds=bounds,
-                p0=p0,
-            )
-            perr = np.sqrt(np.diag(pcov))
+            try:
+                popt, pcov = scipy.optimize.curve_fit(
+                    lambda E, delta, gamma, C=0.0: dynes(
+                        E, delta, gamma, C, fixed_offset
+                    ),
+                    df_range[xaxis_id],
+                    df_range[yaxis_id],
+                    bounds=bounds,
+                    p0=p0,
+                )
+                perr = np.sqrt(np.diag(pcov))
+            except Exception as err:
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    True,
+                    err.__class__.__name__,
+                    traceback.format_exc(),
+                )
         else:
             param_names = ["Delta", "Gamma", "Coeff", "Offset"]
             # bounds
@@ -539,14 +550,23 @@ def update_graph(
             # fit
             lower_lim, upper_lim = fit_range
             df_range = df[(lower_lim < df[xaxis_id]) & (df[xaxis_id] < upper_lim)]
-            popt, pcov = scipy.optimize.curve_fit(
-                dynes,
-                df_range[xaxis_id],
-                df_range[yaxis_id],
-                bounds=bounds,
-                p0=p0,
-            )
-            perr = np.sqrt(np.diag(pcov))
+            try:
+                popt, pcov = scipy.optimize.curve_fit(
+                    dynes,
+                    df_range[xaxis_id],
+                    df_range[yaxis_id],
+                    bounds=bounds,
+                    p0=p0,
+                )
+                perr = np.sqrt(np.diag(pcov))
+            except Exception as err:
+                return (
+                    dash.no_update,
+                    dash.no_update,
+                    True,
+                    err.__class__.__name__,
+                    traceback.format_exc(),
+                )
         # plot function
         xmin = df.min()[xaxis_id]
         xmax = df.max()[xaxis_id]
