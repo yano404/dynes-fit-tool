@@ -5,8 +5,9 @@ Dynes fit tool
 - numpy
 - scipy
 - pandas
-- dash
 - plotly
+- dash
+- dash-bootstrap-components
 
 ## Usage
 Run the app with
