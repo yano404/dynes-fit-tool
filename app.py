@@ -1,6 +1,7 @@
 import base64
 import io
 import json
+import traceback
 
 import dash
 import dash_bootstrap_components as dbc
@@ -73,11 +74,33 @@ def display_style(switch):
         Output("data-table", "data"),
         Output("data-table", "columns"),
         Output("data-table", "filter_action"),
+        Output("data-table-toast", "is_open"),
+        Output("data-table-toast", "header"),
+        Output("data-table-toast", "children"),
     ],
     [Input("upload-data", "contents")],
-    [State("upload-data", "filename")],
+    [
+        State("upload-data", "filename"),
+        State("settings-switch-calc-conductance", "value"),
+        State("settings-voltage-col", "value"),
+        State("settings-voltage-col-mode", "value"),
+        State("settings-current-col", "value"),
+        State("settings-current-col-mode", "value"),
+        State("settings-norm-mode", "value"),
+        State("settings-custom-norm-factor", "value"),
+    ],
 )
-def update_data_table(contents, filename):
+def update_data_table(
+    contents,
+    filename,
+    calc_conductance,
+    voltage_col_pat,
+    voltage_col_mode,
+    current_col_pat,
+    current_col_mode,
+    norm_mode,
+    custom_norm_factor,
+):
     if contents is not None:
         content_type, content_string = contents.split(",")
         decoded = base64.b64decode(content_string)
@@ -95,53 +118,74 @@ def update_data_table(contents, filename):
             else:
                 # User uploaded a not-supported file
                 return (
-                    dbc.Alert(
-                        [
-                            html.H5("Error", className="alert-heading"),
-                            html.P("This file type is not supported."),
-                        ],
-                        color="danger",
-                    ),
+                    html.H6("filename", style={"word-break": "break-all"}),
                     None,
                     None,
                     "none",
+                    True,
+                    "Error",
+                    "This file type is not supported.",
                 )
-        except Exception as e:
-            print(e)
+        except Exception as err:
             return (
-                dbc.Alert(
-                    [
-                        html.H5("Error", className="alert-heading"),
-                        html.P("There was an error processing this file."),
-                    ],
-                    color="danger",
-                ),
+                html.H6("filename", style={"word-break": "break-all"}),
                 None,
                 None,
                 "none",
+                True,
+                err.__class__.__name__,
+                traceback.format_exc(),
             )
-        mask_voltage = df.columns.str.contains("voltage")
-        mask_current = df.columns.str.contains("current")
-        if any(mask_voltage) and any(mask_current):
-            voltage_col_name = df.columns[mask_voltage][0]
-            current_col_name = df.columns[mask_current][0]
-            df = (
-                df.sort_values(current_col_name)
-                .reset_index(drop=True)
-                .drop_duplicates(subset=current_col_name)
-            )
-            voltage = df.loc[:, voltage_col_name]
-            current = df.loc[:, current_col_name]
-            conductance = np.gradient(current.squeeze(), voltage.squeeze())
-            if any(df.columns.str.contains("conductance")):
-                df["conductance_1"] = conductance / conductance[-1]
+        data_table_name = html.H6(filename, style={"word-break": "break-all"})
+        toast_is_open, toast_header, toast_children = False, None, None
+        # calc conductance
+        if calc_conductance:
+            if voltage_col_mode == "contains":
+                mask_voltage = df.columns.str.contains(voltage_col_pat)
+            elif voltage_col_mode == "match":
+                mask_voltage = df.columns.str.match(voltage_col_pat)
+            if current_col_mode == "contains":
+                mask_current = df.columns.str.contains(current_col_pat)
+            elif current_col_mode == "match":
+                mask_current = df.columns.str.match(current_col_pat)
+            try:
+                voltage_col_name = df.columns[mask_voltage][0]
+                current_col_name = df.columns[mask_current][0]
+                df = (
+                    df.sort_values(current_col_name)
+                    .reset_index(drop=True)
+                    .drop_duplicates(subset=current_col_name)
+                )
+                voltage = df.loc[:, voltage_col_name]
+                current = df.loc[:, current_col_name]
+                conductance = np.gradient(current.squeeze(), voltage.squeeze())
+                if norm_mode == 0:
+                    norm_factor = conductance[0]
+                elif norm_mode == 1:
+                    norm_factor = conductance[-1]
+                elif norm_mode == 2:
+                    norm_factor = custom_norm_factor
+                with np.errstate(divide="raise"):
+                    conductance /= norm_factor
+            except Exception as err:
+                toast_is_open, toast_header, toast_children = (
+                    True,
+                    err.__class__.__name__,
+                    traceback.format_exc(),
+                )
             else:
-                df["conductance"] = conductance / conductance[-1]
+                if any(df.columns.str.contains("conductance")):
+                    df["conductance_1"] = conductance
+                else:
+                    df["conductance"] = conductance
         return (
-            html.H6(filename, style={"word-break": "break-all"}),
+            data_table_name,
             df.to_dict("records"),
             [{"name": i, "id": i} for i in df.columns],
             "native",
+            toast_is_open,
+            toast_header,
+            toast_children,
         )
     else:
         return (
@@ -149,6 +193,9 @@ def update_data_table(contents, filename):
             None,
             None,
             "none",
+            False,
+            None,
+            None,
         )
 
 
@@ -1235,6 +1282,7 @@ def make_toast(
 
 # Toasts
 # Display error message etc.
+data_table_toast = make_toast("data-table-toast")
 graph_fit_toast = make_toast("graph-fit-toast")
 fit_range_toast = make_toast("fit-range-toast")
 
@@ -1250,6 +1298,7 @@ app.layout = html.Div(
         settings_modal,
         graph_fit_toast,
         fit_range_toast,
+        data_table_toast,
     ]
 )
 
