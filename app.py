@@ -41,6 +41,7 @@ app = dash.Dash(
     external_stylesheets=external_stylesheets,
     external_scripts=external_scripts,
 )
+app.title = "DynesFit"
 
 
 # validate and set initial params
