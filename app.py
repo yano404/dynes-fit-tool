@@ -1331,7 +1331,8 @@ settings_modal = dbc.Modal(
                                                 id="settings-custom-norm-factor",
                                                 className="mt-1 ml-4",
                                                 type="number",
-                                                placeholder="Custom normalization factor",
+                                                placeholder="Custom "
+                                                "normalization factor",
                                                 persistence=True,
                                                 persistence_type="session",
                                                 style={"width": "95%"},
