@@ -648,7 +648,7 @@ def toggle_settings(n_open, n_close, is_open):
     Output("settings-calc-conductance", "style"),
     [Input("settings-switch-calc-conductance", "value")],
 )
-def toggle_settings_calc_cond(switch):
+def toggle_settings_calc_conductance(switch):
     if switch:
         return display_style(True)
     else:
