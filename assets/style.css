@@ -1,17 +1,59 @@
 /* sidebar */
 #sidebar {
     position: fixed;
-    top: 20px;
+    top: 40px;
     left: 0px;
     bottom: 0px;
-    width: 20%;
-    padding: 2rem 1rem;
+    width: 26rem;
+    padding: 2rem 0rem 0rem;
     background-color: #f8f9fa;
+    border-right: 1px solid lightgray;
+}
+
+/* sidebar tabs */
+#sidebar-tabs {
+    width: 100%;
+}
+#sidebar-tabs.nav-tabs {
+    padding: 0px 1rem;
+    border-bottom: 1px solid lightgray;
+}
+
+#sidebar-tabs.nav-tabs .nav-link {
+    color: #343a40;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-top: 3px solid transparent !important;
+    border-left: 0px !important;
+    border-right: 0px !important;
+    border-bottom: 1px solid lightgray !important;
+    background-color: #f8f9fa;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+#sidebar-tabs.nav-tabs .nav-link.active {
+    background-color: #f8f9fa !important;
+    border-top: 4px solid #007bff !important;
+    border-bottom: 1px #f8f9fa !important;
+    border-left: 1px solid lightgrey !important;
+    border-right: 1px solid lightgrey !important;
+}
+
+/* data panel */
+#data-panel {
+    padding: 0rem 1rem;
+}
+
+/* fit panel */
+#fit-panel {
+    padding: 2rem 1rem 1rem;
 }
 
 /* content */
-#content {
-    margin-left: 20%;
+#contents {
+    margin-left: 26rem;
     margin-right: 0px;
     padding: 1rem 1rem;
 }
@@ -19,8 +61,8 @@
 /* file uploader */
 #upload-data {
     width: 100%;
-    height: 150px;
-    line-height: 150px;
+    height: 8rem;
+    line-height: 8rem;
     border-width: 1px;
     border-style: dashed;
     border-radius: 10px;
@@ -32,4 +74,25 @@
 }
 #upload-data a:hover {
     color: #1EAEDB;
+}
+
+/* data table */
+#data-table-name {
+    word-break: break-all;
+}
+
+#data-table .dash-spreadsheet-container {
+    height: 80vh;
+    max-height: calc(100vh - 25rem);
+    overflow-y: auto;
+}
+
+/* graph card */
+#graph-card {
+    height: calc(100vh - 6rem);
+}
+
+/* graph */
+#graph {
+    height: calc(100vh - 15rem);
 }
