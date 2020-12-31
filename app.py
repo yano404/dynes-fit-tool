@@ -90,6 +90,7 @@ def display_style(switch):
         State("settings-norm-mode", "value"),
         State("settings-custom-norm-factor", "value"),
     ],
+    prevent_initial_call=True,
 )
 def update_data_table(
     contents,
@@ -190,9 +191,9 @@ def update_data_table(
         )
     else:
         return (
-            html.H6("filename"),
-            None,
-            None,
+            dash.no_update,
+            dash.no_update,
+            dash.no_update,
             "none",
             False,
             None,
@@ -739,11 +740,12 @@ data_table = html.Div(
         dcc.Loading(
             id="loading-file",
             type="circle",
-            children=html.Div(id="data-table-name"),
+            children=html.Div(id="data-table-name", children=html.H6("filename")),
         ),
         dash_table.DataTable(
             id="data-table",
             row_deletable=True,
+            sort_action="native",
             # filter_action='native',
             fixed_rows={"headers": True},
             page_action="none",
