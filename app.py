@@ -1366,4 +1366,5 @@ app.layout = html.Div(
 )
 
 if __name__ == "__main__":
+    # `debug=False` or empty param turns off Dash Dev Tools
     app.run_server(debug=True)
