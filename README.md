@@ -1,6 +1,8 @@
 Dynes fit tool
 ==============
 
+![screenshot](assets/screenshot.png)
+
 ## Requirements
 - numpy
 - scipy
