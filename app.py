@@ -812,6 +812,8 @@ fit_panel = html.Div(
                                 options=[{"label": "Display range", "value": True}],
                                 value=[],
                                 switch=True,
+                                persistence=True,
+                                persistence_type="session",
                             ),
                             width=7,
                         ),
@@ -845,6 +847,8 @@ fit_panel = html.Div(
                         ],
                         value=[],
                         switch=True,
+                        persistence=True,
+                        persistence_type="session",
                     ),
                     width="auto",
                 )
@@ -868,6 +872,8 @@ fit_panel = html.Div(
                                             ],
                                             value=[],
                                             switch=True,
+                                            persistence=True,
+                                            persistence_type="session",
                                         )
                                     ),
                                     dbc.Col(
@@ -898,6 +904,8 @@ fit_panel = html.Div(
                                                 placeholder="lower bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                             dbc.Label(
                                                 "upper bounds",
@@ -908,6 +916,8 @@ fit_panel = html.Div(
                                                 placeholder="upper bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -923,6 +933,8 @@ fit_panel = html.Div(
                                                 placeholder="lower bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                             dbc.Label(
                                                 "upper bounds",
@@ -933,6 +945,8 @@ fit_panel = html.Div(
                                                 placeholder="upper bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -948,6 +962,8 @@ fit_panel = html.Div(
                                                 placeholder="lower bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                             dbc.Label(
                                                 "upper bounds",
@@ -958,6 +974,8 @@ fit_panel = html.Div(
                                                 placeholder="upper bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -973,6 +991,8 @@ fit_panel = html.Div(
                                                 placeholder="lower bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                             dbc.Label(
                                                 "upper bounds",
@@ -983,6 +1003,8 @@ fit_panel = html.Div(
                                                 placeholder="upper bounds",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -1010,6 +1032,8 @@ fit_panel = html.Div(
                                             ],
                                             value=[],
                                             switch=True,
+                                            persistence=True,
+                                            persistence_type="session",
                                         )
                                     ),
                                     dbc.Col(
@@ -1039,6 +1063,8 @@ fit_panel = html.Div(
                                                 placeholder="Delta p0",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -1053,6 +1079,8 @@ fit_panel = html.Div(
                                                 placeholder="Gamma p0",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -1067,6 +1095,8 @@ fit_panel = html.Div(
                                                 placeholder="Coeff p0",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
@@ -1081,6 +1111,8 @@ fit_panel = html.Div(
                                                 placeholder="Offset p0",
                                                 type="number",
                                                 bs_size="sm",
+                                                persistence=True,
+                                                persistence_type="session",
                                             ),
                                         ]
                                     ),
