@@ -10,6 +10,13 @@
     border-right: 1px solid lightgray;
 }
 
+/* contents */
+#contents {
+    margin-left: 26rem;
+    margin-right: 0px;
+    padding: 1rem 1rem;
+}
+
 /* sidebar tabs */
 #sidebar-tabs {
     width: 100%;
@@ -51,12 +58,23 @@
     padding: 2rem 1rem 1rem;
 }
 
-/* content */
-#contents {
-    margin-left: 26rem;
-    margin-right: 0px;
-    padding: 1rem 1rem;
+#card-body-bounds-inner {
+    height: 20rem;
 }
+
+#card-body-p0-inner {
+    height: auto;
+}
+
+#fit-result {
+    height: auto;
+    min-height: 10rem;
+}
+
+#fit-details {
+    height: 20rem;
+}
+
 
 /* file uploader */
 #upload-data {

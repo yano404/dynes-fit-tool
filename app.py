@@ -326,15 +326,15 @@ def switch_fix_offset(fix_offset):
     Input("card-body-bounds-open", "n_clicks"),
     State("card-body-bounds", "is_open"),
 )
-def toggle_bounds_cards(n_bounds, bouns_is_open):
+def toggle_bounds_card(n_bounds, bounds_is_open):
     angle_left = "fas fa-angle-left"
     angle_down = "fas fa-angle-down"
     if not n_bounds:
         return (False, angle_left)
-    if bouns_is_open:
-        return (not bouns_is_open, angle_left)
+    if bounds_is_open:
+        return (not bounds_is_open, angle_left)
     else:
-        return (not bouns_is_open, angle_down)
+        return (not bounds_is_open, angle_down)
 
 
 @app.callback(
@@ -345,7 +345,7 @@ def toggle_bounds_cards(n_bounds, bouns_is_open):
     Input("card-body-p0-open", "n_clicks"),
     State("card-body-p0", "is_open"),
 )
-def toggle_p0_cards(n_p0, p0_is_open):
+def toggle_p0_card(n_p0, p0_is_open):
     angle_left = "fas fa-angle-left"
     angle_down = "fas fa-angle-down"
     if not n_p0:
@@ -358,8 +358,47 @@ def toggle_p0_cards(n_p0, p0_is_open):
 
 @app.callback(
     [
+        Output("card-body-fit-result", "is_open"),
+        Output("card-body-fit-result-open", "className"),
+    ],
+    Input("card-body-fit-result-open", "n_clicks"),
+    State("card-body-fit-result", "is_open"),
+)
+def toggle_fit_result_card(n_fit_result, fit_result_is_open):
+    angle_left = "fas fa-angle-left"
+    angle_down = "fas fa-angle-down"
+    if not n_fit_result:
+        return (True, angle_down)
+    if fit_result_is_open:
+        return (not fit_result_is_open, angle_left)
+    else:
+        return (not fit_result_is_open, angle_down)
+
+
+@app.callback(
+    [
+        Output("card-body-fit-details", "is_open"),
+        Output("card-body-fit-details-open", "className"),
+    ],
+    Input("card-body-fit-details-open", "n_clicks"),
+    State("card-body-fit-details", "is_open"),
+)
+def toggle_fit_details_card(n_fit_details, fit_details_is_open):
+    angle_left = "fas fa-angle-left"
+    angle_down = "fas fa-angle-down"
+    if not n_fit_details:
+        return (False, angle_left)
+    if fit_details_is_open:
+        return (not fit_details_is_open, angle_left)
+    else:
+        return (not fit_details_is_open, angle_down)
+
+
+@app.callback(
+    [
         Output("graph", "figure"),
         Output("fit-result", "children"),
+        Output("fit-details", "children"),
         Output("graph-fit-toast", "is_open"),
         Output("graph-fit-toast", "header"),
         Output("graph-fit-toast", "children"),
@@ -459,11 +498,25 @@ def update_graph(
                 if None in lower_bounds or None in upper_bounds:
                     err_header = "ValueError"
                     err_msg = "None in the bounds. Remove None!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 if np.any(lower_bounds >= upper_bounds):
                     err_header = "ValueError"
                     err_msg = "lower_bounds >= upper_bounds."
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 bounds = (lower_bounds, upper_bounds)
             else:
                 # default bounds
@@ -476,12 +529,26 @@ def update_graph(
                 if None in p0:
                     err_header = "ValueError"
                     err_msg = "None in the p0. Remove None!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 # check if p0 in bounds
                 if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
                     err_header = "ValueError"
                     err_msg = "p0 are out of bounds!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
             else:
                 # default p0
                 # default Delta_0 = x that corresponds to the peak y
@@ -508,6 +575,7 @@ def update_graph(
                 return (
                     dash.no_update,
                     dash.no_update,
+                    dash.no_update,
                     True,
                     err.__class__.__name__,
                     traceback.format_exc(),
@@ -521,11 +589,25 @@ def update_graph(
                 if None in lower_bounds or None in upper_bounds:
                     err_header = "ValueError"
                     err_msg = "None in the bounds. Remove None!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 if np.any(lower_bounds >= upper_bounds):
                     err_header = "ValueError"
                     err_msg = "lower_bounds >= upper_bounds."
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 bounds = (lower_bounds, upper_bounds)
             else:
                 # default bounds
@@ -538,12 +620,26 @@ def update_graph(
                 if None in p0:
                     err_header = "ValueError"
                     err_msg = "None in the p0. Remove None!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
                 # check if p0 in bounds
                 if np.any(p0 > upper_bounds) or np.any(p0 < lower_bounds):
                     err_header = "ValueError"
                     err_msg = "p0 are out of bounds!"
-                    return (dash.no_update, dash.no_update, True, err_header, err_msg)
+                    return (
+                        dash.no_update,
+                        dash.no_update,
+                        dash.no_update,
+                        True,
+                        err_header,
+                        err_msg,
+                    )
             else:
                 # default p0
                 # default Delta_0 = x that corresponds to the peak y
@@ -567,6 +663,7 @@ def update_graph(
                 perr = np.sqrt(np.diag(pcov))
             except Exception as err:
                 return (
+                    dash.no_update,
                     dash.no_update,
                     dash.no_update,
                     True,
@@ -605,10 +702,9 @@ def update_graph(
                 ]
             )
         ]
-        result = html.Div(
+        result = html.Div([dbc.Table(tab_header + tab_body)])
+        details = html.Div(
             [
-                dbc.Table(tab_header + tab_body),
-                html.Hr(),
                 html.Pre(
                     json.dumps(
                         {
@@ -619,6 +715,7 @@ def update_graph(
                         indent=2,
                     ),
                 ),
+                html.Hr(),
                 html.Pre(
                     json.dumps(
                         {
@@ -633,8 +730,9 @@ def update_graph(
         )
     else:
         result = None
+        details = None
 
-    return (fig, result, False, None, None)
+    return (fig, result, details, False, None, None)
 
 
 @app.callback(
@@ -871,6 +969,7 @@ fit_panel = html.Div(
                                     dbc.Col(
                                         dbc.Checklist(
                                             id="use-bounds",
+                                            className="h6",
                                             options=[
                                                 {
                                                     "label": "Bounds",
@@ -897,8 +996,11 @@ fit_panel = html.Div(
                             )
                         ),
                         dbc.Collapse(
-                            dbc.CardBody(
-                                [
+                            id="card-body-bounds",
+                            children=dbc.CardBody(
+                                id="card-body-bounds-inner",
+                                className="overflow-auto",
+                                children=[
                                     html.H6("Delta", className="text-center"),
                                     dbc.FormGroup(
                                         [
@@ -1016,10 +1118,7 @@ fit_panel = html.Div(
                                         ]
                                     ),
                                 ],
-                                className="overflow-auto",
-                                style={"height": "35vh"},
                             ),
-                            id="card-body-bounds",
                         ),
                     ]
                 ),
@@ -1031,6 +1130,7 @@ fit_panel = html.Div(
                                     dbc.Col(
                                         dbc.Checklist(
                                             id="use-p0",
+                                            className="h6",
                                             options=[
                                                 {
                                                     "label": "Init params",
@@ -1057,8 +1157,10 @@ fit_panel = html.Div(
                             )
                         ),
                         dbc.Collapse(
-                            dbc.CardBody(
-                                [
+                            id="card-body-p0",
+                            children=dbc.CardBody(
+                                id="card-body-p0-inner",
+                                children=[
                                     dbc.FormGroup(
                                         [
                                             dbc.Label(
@@ -1123,25 +1225,74 @@ fit_panel = html.Div(
                                             ),
                                         ]
                                     ),
-                                ]
+                                ],
                             ),
-                            id="card-body-p0",
                         ),
                     ]
                 ),
             ],
             className="accordion mt-3",
         ),
-        dbc.Card(
+        html.Div(
             [
-                dbc.CardHeader([html.H6("Result")]),
-                dbc.CardBody(
-                    [html.Div(id="fit-result")],
-                    className="overflow-auto",
-                    style={"height": "18rem"},
+                dbc.Card(
+                    [
+                        dbc.CardHeader(
+                            dbc.Row(
+                                [
+                                    dbc.Col(html.H6("Result")),
+                                    dbc.Col(
+                                        dbc.Button(
+                                            className="fas fa-angle-down",
+                                            color="light",
+                                            id="card-body-fit-result-open",
+                                        ),
+                                        width={"size": 1, "order": 12},
+                                        className="mr-3",
+                                    ),
+                                ],
+                                align="center",
+                            )
+                        ),
+                        dbc.Collapse(
+                            id="card-body-fit-result",
+                            children=dbc.CardBody(
+                                id="fit-result", className="overflow-auto"
+                            ),
+                            is_open=True,
+                        ),
+                    ],
+                ),
+                dbc.Card(
+                    [
+                        dbc.CardHeader(
+                            dbc.Row(
+                                [
+                                    dbc.Col(html.H6("Fit details")),
+                                    dbc.Col(
+                                        dbc.Button(
+                                            className="fas fa-angle-left",
+                                            color="light",
+                                            id="card-body-fit-details-open",
+                                        ),
+                                        width={"size": 1, "order": 12},
+                                        className="mr-3",
+                                    ),
+                                ],
+                                align="center",
+                            )
+                        ),
+                        dbc.Collapse(
+                            id="card-body-fit-details",
+                            children=dbc.CardBody(
+                                id="fit-details",
+                                className="overflow-auto",
+                            ),
+                        ),
+                    ],
                 ),
             ],
-            className="mt-3",
+            className="accordion mt-3",
         ),
     ],
 )
