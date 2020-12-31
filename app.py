@@ -83,9 +83,10 @@ def display_style(switch):
     [
         State("upload-data", "filename"),
         State("settings-switch-calc-conductance", "value"),
-        State("settings-voltage-col", "value"),
+        State("settings-conductance-col", "value"),
+        State("settings-voltage-col-pat", "value"),
         State("settings-voltage-col-mode", "value"),
-        State("settings-current-col", "value"),
+        State("settings-current-col-pat", "value"),
         State("settings-current-col-mode", "value"),
         State("settings-norm-mode", "value"),
         State("settings-custom-norm-factor", "value"),
@@ -96,6 +97,7 @@ def update_data_table(
     contents,
     filename,
     calc_conductance,
+    conductance_col_name,
     voltage_col_pat,
     voltage_col_mode,
     current_col_pat,
@@ -169,17 +171,20 @@ def update_data_table(
                     norm_factor = custom_norm_factor
                 with np.errstate(divide="raise"):
                     conductance /= norm_factor
+
+                if conductance_col_name:
+                    if any(df.columns.str.contains(conductance_col_name)):
+                        df[conductance_col_name + "_1"] = conductance
+                    else:
+                        df[conductance_col_name] = conductance
+                else:
+                    raise ValueError("Conductance column name must not be empty")
             except Exception as err:
                 toast_is_open, toast_header, toast_children = (
                     True,
                     err.__class__.__name__,
                     traceback.format_exc(),
                 )
-            else:
-                if any(df.columns.str.contains("conductance")):
-                    df["conductance_1"] = conductance
-                else:
-                    df["conductance"] = conductance
         return (
             data_table_name,
             df.to_dict("records"),
@@ -1219,14 +1224,36 @@ settings_modal = dbc.Modal(
                             ),
                             html.Div(
                                 [
+                                    html.H6(
+                                        "Conductance column name", className="mt-2"
+                                    ),
+                                    dbc.FormGroup(
+                                        [
+                                            dbc.Input(
+                                                id="settings-conductance-col",
+                                                type="text",
+                                                value="conductance",
+                                                placeholder="Conductance column name",
+                                                persistence=True,
+                                                persistence_type="session",
+                                            ),
+                                            dbc.FormText(
+                                                "Calculated conductance is "
+                                                "added as a new column.\n"
+                                                "Type the name of conductance column.\n"
+                                                "Default: conductance."
+                                            ),
+                                        ]
+                                    ),
                                     html.H6("Voltage column name", className="mt-2"),
                                     dbc.FormGroup(
                                         [
                                             dbc.Input(
-                                                id="settings-voltage-col",
+                                                id="settings-voltage-col-pat",
                                                 type="text",
                                                 value="voltage",
-                                                placeholder="Type voltage column name",
+                                                placeholder="Pattern of "
+                                                "the voltage column name",
                                                 persistence=True,
                                                 persistence_type="session",
                                             ),
@@ -1253,10 +1280,11 @@ settings_modal = dbc.Modal(
                                     dbc.FormGroup(
                                         [
                                             dbc.Input(
-                                                id="settings-current-col",
+                                                id="settings-current-col-pat",
                                                 type="text",
                                                 value="current",
-                                                placeholder="Type current column name",
+                                                placeholder="Pattern of "
+                                                "the current column name",
                                                 persistence=True,
                                                 persistence_type="session",
                                             ),
