@@ -4,12 +4,13 @@ Dynes fit tool
 ![screenshot](assets/screenshot.png)
 
 ## Requirements
-- numpy
-- scipy
-- pandas
-- plotly
-- dash
-- dash-bootstrap-components
+- python >= 3.7
+- numpy >= 1.15.0
+- scipy >= 1.3.0
+- pandas >= 1.0.0
+- plotly >= 4.0.0
+- dash >= 1.0.0
+- dash-bootstrap-components >= 0.10.0
 
 ## Usage
 Run the app with
