@@ -969,7 +969,6 @@ fit_panel = html.Div(
                                     dbc.Col(
                                         dbc.Checklist(
                                             id="use-bounds",
-                                            className="h6",
                                             options=[
                                                 {
                                                     "label": "Bounds",
@@ -1130,7 +1129,6 @@ fit_panel = html.Div(
                                     dbc.Col(
                                         dbc.Checklist(
                                             id="use-p0",
-                                            className="h6",
                                             options=[
                                                 {
                                                     "label": "Init params",
@@ -1240,7 +1238,7 @@ fit_panel = html.Div(
                         dbc.CardHeader(
                             dbc.Row(
                                 [
-                                    dbc.Col(html.H6("Result")),
+                                    dbc.Col(html.Div("Result")),
                                     dbc.Col(
                                         dbc.Button(
                                             className="fas fa-angle-down",
@@ -1268,7 +1266,7 @@ fit_panel = html.Div(
                         dbc.CardHeader(
                             dbc.Row(
                                 [
-                                    dbc.Col(html.H6("Fit details")),
+                                    dbc.Col(html.Div("Fit details")),
                                     dbc.Col(
                                         dbc.Button(
                                             className="fas fa-angle-left",
