@@ -1350,8 +1350,26 @@ graph = dbc.Card(
 
 # Settings
 settings_modal = dbc.Modal(
-    [
-        dbc.ModalHeader(html.H4("Settings")),
+    id="settings-modal",
+    children=[
+        dbc.ModalHeader(
+            id="settings-modal-header",
+            children=dbc.Row(
+                id="settings-modal-header-inner",
+                children=[
+                    dbc.Col(html.H4("Settings")),
+                    dbc.Col(
+                        dbc.Button(
+                            id="settings-close-button",
+                            className="fas fa-times",
+                        ),
+                        width={"size": 1, "order": 12},
+                    ),
+                ],
+                align="start",
+                justify="between",
+            ),
+        ),
         dbc.ModalBody(
             [
                 dbc.Card(
@@ -1497,11 +1515,8 @@ settings_modal = dbc.Modal(
                 )
             ]
         ),
-        dbc.ModalFooter(
-            dbc.Button("Close", id="settings-close-button", className="ml-auto")
-        ),
+        dbc.ModalFooter(),
     ],
-    id="settings-modal",
     scrollable=True,
 )
 

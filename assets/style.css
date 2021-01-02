@@ -114,3 +114,15 @@
 #graph {
     height: calc(100vh - 15rem);
 }
+
+/* settings modal */
+#settings-modal-header {
+    height: 3.5rem;
+}
+
+#settings-modal-header-inner {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    right: 2.5rem;
+}
