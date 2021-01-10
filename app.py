@@ -868,6 +868,59 @@ data_panel = html.Div(
     ],
 )
 
+
+def make_bounds_form(param):
+    param_lower_id = param + "-lower"
+    param_upper_id = param + "-upper"
+    return dbc.FormGroup(
+        [
+            dbc.Label(
+                "lower bounds",
+                html_for=param_lower_id,
+            ),
+            dbc.Input(
+                id=param_lower_id,
+                placeholder="lower bounds",
+                type="number",
+                bs_size="sm",
+                persistence=True,
+                persistence_type="session",
+            ),
+            dbc.Label(
+                "upper bounds",
+                html_for=param_upper_id,
+            ),
+            dbc.Input(
+                id=param_upper_id,
+                placeholder="upper bounds",
+                type="number",
+                bs_size="sm",
+                persistence=True,
+                persistence_type="session",
+            ),
+        ]
+    )
+
+
+def make_p0_form(param_name, param_p0_id):
+    return dbc.FormGroup(
+        [
+            dbc.Label(
+                param_name,
+                html_for=param_p0_id,
+            ),
+            dbc.Input(
+                id=param_p0_id,
+                placeholder=param_name + " p0",
+                type="number",
+                bs_size="sm",
+                persistence=True,
+                persistence_type="session",
+            ),
+        ]
+    )
+
+
 # Fit panel
 fit_panel = html.Div(
     id="fit-panel",
@@ -1001,121 +1054,13 @@ fit_panel = html.Div(
                                 className="overflow-auto",
                                 children=[
                                     html.H6("Delta", className="text-center"),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "lower bounds",
-                                                html_for="D-lower",
-                                            ),
-                                            dbc.Input(
-                                                id="D-lower",
-                                                placeholder="lower bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                            dbc.Label(
-                                                "upper bounds",
-                                                html_for="D-upper",
-                                            ),
-                                            dbc.Input(
-                                                id="D-upper",
-                                                placeholder="upper bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
+                                    make_bounds_form("D"),
                                     html.H6("Gamma", className="text-center"),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "lower bounds",
-                                                html_for="G-lower",
-                                            ),
-                                            dbc.Input(
-                                                id="G-lower",
-                                                placeholder="lower bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                            dbc.Label(
-                                                "upper bounds",
-                                                html_for="G-upper",
-                                            ),
-                                            dbc.Input(
-                                                id="G-upper",
-                                                placeholder="upper bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
+                                    make_bounds_form("G"),
                                     html.H6("Coeff", className="text-center"),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "lower bounds",
-                                                html_for="C-lower",
-                                            ),
-                                            dbc.Input(
-                                                id="C-lower",
-                                                placeholder="lower bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                            dbc.Label(
-                                                "upper bounds",
-                                                html_for="C-upper",
-                                            ),
-                                            dbc.Input(
-                                                id="C-upper",
-                                                placeholder="upper bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
+                                    make_bounds_form("C"),
                                     html.H6("Offset", className="text-center"),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "lower bounds",
-                                                html_for="offset-lower",
-                                            ),
-                                            dbc.Input(
-                                                id="offset-lower",
-                                                placeholder="lower bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                            dbc.Label(
-                                                "upper bounds",
-                                                html_for="offset-upper",
-                                            ),
-                                            dbc.Input(
-                                                id="offset-upper",
-                                                placeholder="upper bounds",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
+                                    make_bounds_form("offset"),
                                 ],
                             ),
                         ),
@@ -1159,70 +1104,10 @@ fit_panel = html.Div(
                             children=dbc.CardBody(
                                 id="card-body-p0-inner",
                                 children=[
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "Delta",
-                                                html_for="D-p0",
-                                            ),
-                                            dbc.Input(
-                                                id="D-p0",
-                                                placeholder="Delta p0",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "Gamma",
-                                                html_for="G-p0",
-                                            ),
-                                            dbc.Input(
-                                                id="G-p0",
-                                                placeholder="Gamma p0",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "Coeff",
-                                                html_for="C-p0",
-                                            ),
-                                            dbc.Input(
-                                                id="C-p0",
-                                                placeholder="Coeff p0",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
-                                    dbc.FormGroup(
-                                        [
-                                            dbc.Label(
-                                                "Offset",
-                                                html_for="offset-p0",
-                                            ),
-                                            dbc.Input(
-                                                id="offset-p0",
-                                                placeholder="Offset p0",
-                                                type="number",
-                                                bs_size="sm",
-                                                persistence=True,
-                                                persistence_type="session",
-                                            ),
-                                        ]
-                                    ),
+                                    make_p0_form("Delta", "D-p0"),
+                                    make_p0_form("Gamma", "G-p0"),
+                                    make_p0_form("Coeff", "C-p0"),
+                                    make_p0_form("Offset", "offset-p0"),
                                 ],
                             ),
                         ),
