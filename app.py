@@ -17,7 +17,7 @@ from dash.exceptions import PreventUpdate
 
 
 # dynes function
-def dynes(E, delta, gamma, coeff=0.0, offset=0.0):
+def dynes(E, delta, gamma, coeff=1.0, offset=0.0):
     igam = gamma * 1.0j
     return (
         coeff
